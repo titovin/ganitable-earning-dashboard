@@ -1,7 +1,7 @@
 'use client';
 
 import { Chef } from '@/components/component/chef';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react';
 
