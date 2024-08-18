@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react';
 
-function ChefPage() {
+function Home() {
 	const [ payments, setPayments ] = useState([]);
 	const [ isLoading, setIsLoading ] = useState(false);
 	const [ error, setError ] = useState(null);
@@ -40,4 +40,4 @@ function ChefPage() {
 	return <Chef payments={payments} />;
 }
 
-export default ChefPage;
+export default Home;
