@@ -14,29 +14,23 @@ function Home() {
 		fetchPayments();
 	}, []); // Add dependencies here if needed
 
-  const fetchPayments = async () => {
+  async function fetchPayments() {
     try {
-      // Execute the stored procedure (RPC) to get payments
-      const { data, error, status, statusText } = await supabase.rpc('get_payments');
+      const { data, error } = await supabase.rpc('get_payments');
   
-      // Handle any errors returned by Supabase
       if (error) {
         console.error('Error fetching Payments:', error.message);
-        return null;
+        return { notFound: true }; // Return `notFound` if data cannot be fetched
       }
   
-      // Log the received payments data
-      console.log('Payments:', data);
-  
-      // Update the state with the fetched payments data
-      setPayments(data);
-  
-      // Return the fetched data
-      return data;
+      return {
+        props: {
+          payments: data,
+        },
+      };
     } catch (err) {
-      // Catch any unexpected errors
-      console.error('Unexpected error fetching Payments:', err);
-      return null;
+      console.error('Unexpected error during prerendering:', err);
+      return { notFound: true }; // Handle unexpected errors
     }
   };
   
