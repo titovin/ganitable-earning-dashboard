@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 
 function ChefPage() {
 	const [ payments, setPayments ] = useState([]);
-	const [ isLoading, setIsLoading ] = useState(false);
+	const [ isLoading, setIsLoading ] = useState(true);
 	const [ error, setError ] = useState(null);
 
 	useEffect(() => {
@@ -15,6 +15,7 @@ function ChefPage() {
 	}, []); // Add dependencies here if needed
 
 	const fetchPayments = async () => {
+    setIsLoading(false)
 		let { data, error, count, status, statusText } = await supabase.rpc('get_payments');
 		if (error) console.error(error);
 		else console.log(data);
@@ -24,7 +25,7 @@ function ChefPage() {
 			return null;
 		}
 
-		console.log('Payments:', data);
+		setPayments(data)
 		return data;
 	};
 
