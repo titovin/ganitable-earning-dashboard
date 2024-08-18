@@ -14,20 +14,32 @@ function Home() {
 		fetchPayments();
 	}, []); // Add dependencies here if needed
 
-	const fetchPayments = async () => {
-		let { data, error, count, status, statusText } = await supabase.rpc('get_payments');
-		if (error) console.error(error);
-		else console.log(data);
-
-		if (error) {
-			console.error('Error fetching Payments:', error);
-			return null;
-		}
-
-		console.log('Payments:', data);
-    setPayments(data)
-		return data;
-	};
+  const fetchPayments = async () => {
+    try {
+      // Execute the stored procedure (RPC) to get payments
+      const { data, error, status, statusText } = await supabase.rpc('get_payments');
+  
+      // Handle any errors returned by Supabase
+      if (error) {
+        console.error('Error fetching Payments:', error.message);
+        return null;
+      }
+  
+      // Log the received payments data
+      console.log('Payments:', data);
+  
+      // Update the state with the fetched payments data
+      setPayments(data);
+  
+      // Return the fetched data
+      return data;
+    } catch (err) {
+      // Catch any unexpected errors
+      console.error('Unexpected error fetching Payments:', err);
+      return null;
+    }
+  };
+  
 
 	if (isLoading) {
 		return <div>Loading...</div>;
