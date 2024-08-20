@@ -95,7 +95,7 @@ export function Chef({ payments }: ChefProps) {
             <CardDescription>View and manage your chef earnings and payouts.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 flex gap-4">
+            <div className="mb-4 flex lg:flex-row flex-col gap-4">
               <input
                 type="text"
                 placeholder="Filter by Chef Name"
