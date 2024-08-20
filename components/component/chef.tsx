@@ -1,10 +1,12 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { JSX, SVGProps } from "react"
+import React, { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { useDateFormatter } from "@/hooks/useDateFormater";
+import Chip from "@mui/material/Chip";
+import { Badge } from "lucide-react";
 
-// Define the type for a single payment
 type Payment = {
-  date: string;
+  date: Date;
   transaction_id: string;
   user_id: string;
   chef_name: string;
@@ -15,23 +17,29 @@ type Payment = {
   bank_name: string;
   account_name: string;
   account_number: string;
-}
+};
 
-// Define the props for the Chef component
 type ChefProps = {
   payments: Payment[];
-}
+};
 
 export function Chef({ payments }: ChefProps) {
-  // Calculate totals
+  const { toTime } = useDateFormatter();
+  const [selectedChef, setSelectedChef] = useState<string>('');
+
   const totalEarnings = payments.reduce((sum, payment) => sum + parseFloat(payment.total.replace('$', '')), 0);
   const pendingPayouts = totalEarnings * 0.2; // Assuming 20% pending
   const approvedPayouts = totalEarnings * 0.8; // Assuming 80% approved
 
+  const filteredPayments = selectedChef
+    ? payments.filter(payment => payment.chef_name.toLowerCase().includes(selectedChef.toLowerCase()))
+    : payments;
+
   return (
-    <div className="flex min-h-screen flex-col bg-muted/40 p-10">
+    <div className="flex min-h-screen flex-col bg-muted/40">
       <main className="flex-1 overflow-auto p-4 sm:p-6">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Cards for Total Earnings, Pending Payouts, Approved Payouts */}
           <Card>
             <CardHeader>
               <CardTitle>Total Earnings</CardTitle>
@@ -76,11 +84,19 @@ export function Chef({ payments }: ChefProps) {
             <CardDescription>View and manage your chef earnings and payouts.</CardDescription>
           </CardHeader>
           <CardContent>
+            <input
+              type="text"
+              placeholder="Filter by Chef Name"
+              value={selectedChef}
+              onChange={(e) => setSelectedChef(e.target.value)}
+              className="mb-4 p-2 border border-gray-300 rounded"
+            />
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Transaction ID</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>User ID</TableHead>
                   <TableHead>Chef Name</TableHead>
                   <TableHead>Email</TableHead>
@@ -93,10 +109,13 @@ export function Chef({ payments }: ChefProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payments.map((payment, index) => (
+                {filteredPayments.map((payment, index) => (
                   <TableRow key={index}>
-                    <TableCell>{payment.date}</TableCell>
+                    <TableCell>{toTime(new Date(payment.date))}</TableCell>
                     <TableCell>{payment.transaction_id}</TableCell>
+                    <TableCell>
+                      <Chip label="Paid" size="small" color="warning" variant="filled" />
+                    </TableCell>
                     <TableCell>{payment.user_id}</TableCell>
                     <TableCell>{payment.chef_name}</TableCell>
                     <TableCell>{payment.email}</TableCell>
@@ -114,7 +133,7 @@ export function Chef({ payments }: ChefProps) {
         </Card>
       </main>
     </div>
-  )
+  );
 }
 
 const DollarSignIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
@@ -135,4 +154,4 @@ const DollarSignIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
   );
-}
+};
