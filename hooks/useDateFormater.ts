@@ -7,7 +7,25 @@ export function useDateFormatter() {
     }).format(date);
   };
 
-  return { toTime };
+    // New function to format just the date
+    const toDate = (input: string | Date) => {
+      let date: Date;
+  
+      if (typeof input === "string") {
+        date = new Date(input);
+      } else {
+        date = input;
+      }
+  
+      return new Intl.DateTimeFormat("en", {
+        year: "numeric",
+        month: "long", // "short" or "numeric" can also be used
+        day: "2-digit",
+      }).format(date);
+    };
+  
+
+  return { toTime , toDate};
 }
 
 // useTimeFormatter.ts

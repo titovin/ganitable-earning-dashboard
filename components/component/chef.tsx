@@ -3,7 +3,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useDateFormatter } from "@/hooks/useDateFormater";
 import Chip from "@mui/material/Chip";
-import { Badge } from "lucide-react";
 
 type Payment = {
   date: Date;
@@ -24,16 +23,28 @@ type ChefProps = {
 };
 
 export function Chef({ payments }: ChefProps) {
-  const { toTime } = useDateFormatter();
+  const { toTime, toDate } = useDateFormatter();
   const [selectedChef, setSelectedChef] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   const totalEarnings = payments.reduce((sum, payment) => sum + parseFloat(payment.total.replace('$', '')), 0);
   const pendingPayouts = totalEarnings * 0.2; // Assuming 20% pending
   const approvedPayouts = totalEarnings * 0.8; // Assuming 80% approved
 
-  const filteredPayments = selectedChef
-    ? payments.filter(payment => payment.chef_name.toLowerCase().includes(selectedChef.toLowerCase()))
-    : payments;
+  const filteredPayments = payments
+    .filter(payment => {
+      const paymentDate = new Date(payment.date);
+      const filterStartDate = new Date(startDate);
+      const filterEndDate = new Date(endDate);
+
+      return (
+        (selectedChef ? payment.chef_name.toLowerCase().includes(selectedChef.toLowerCase()) : true) &&
+        (isNaN(filterStartDate.getTime()) || paymentDate >= filterStartDate) &&
+        (isNaN(filterEndDate.getTime()) || paymentDate <= filterEndDate)
+      );
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/40">
@@ -84,17 +95,34 @@ export function Chef({ payments }: ChefProps) {
             <CardDescription>View and manage your chef earnings and payouts.</CardDescription>
           </CardHeader>
           <CardContent>
-            <input
-              type="text"
-              placeholder="Filter by Chef Name"
-              value={selectedChef}
-              onChange={(e) => setSelectedChef(e.target.value)}
-              className="mb-4 p-2 border border-gray-300 rounded"
-            />
+            <div className="mb-4 flex gap-4">
+              <input
+                type="text"
+                placeholder="Filter by Chef Name"
+                value={selectedChef}
+                onChange={(e) => setSelectedChef(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+              />
+              <input
+                type="date"
+                placeholder="From Date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+              />
+              <input
+                type="date"
+                placeholder="To Date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+              />
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>Time</TableHead>
                   <TableHead>Transaction ID</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>User ID</TableHead>
@@ -111,6 +139,7 @@ export function Chef({ payments }: ChefProps) {
               <TableBody>
                 {filteredPayments.map((payment, index) => (
                   <TableRow key={index}>
+                    <TableCell>{toDate(new Date(payment.date))}</TableCell>
                     <TableCell>{toTime(new Date(payment.date))}</TableCell>
                     <TableCell>{payment.transaction_id}</TableCell>
                     <TableCell>
@@ -135,6 +164,7 @@ export function Chef({ payments }: ChefProps) {
     </div>
   );
 }
+
 
 const DollarSignIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
   return (
